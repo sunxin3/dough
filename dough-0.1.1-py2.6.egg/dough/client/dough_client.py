@@ -32,7 +32,7 @@ logging.setup()
 
 api_opts = [
     cfg.StrOpt('api_host',
-               default='172.19.8.1',
+               default='172.19.9.1',
                help='IP address of dough API.'),
     cfg.IntOpt('api_port',
                default=5554,

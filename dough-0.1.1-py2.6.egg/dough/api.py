@@ -263,8 +263,9 @@ def query_monthly_report(context, timestamp_from=None,
             continue
         region_name = subscription['product']['region']['name']
         item_name = subscription['product']['item']['name']
-        subscriptions.append([subscription_id, region_name, item_name])
-    for subscription_id, region_name, item_name in subscriptions:
+        resource_uuid = subscription['resource_uuid']
+        subscriptions.append([subscription_id, region_name, item_name, resource_uuid])
+    for subscription_id, region_name, item_name, resource_uuid in subscriptions:
         purchases = db.purchase_get_all_by_subscription_and_timeframe(context,
                                                             subscription_id,
                                                             datetime_from,
@@ -272,8 +273,9 @@ def query_monthly_report(context, timestamp_from=None,
         if not purchases:
             continue
         monthly_report = dict()
-        monthly_report.setdefault('regionnm', 0)
-        monthly_report['regionnm'] = region_name
+        monthly_report.setdefault('resourceuuid', 0)
+#        monthly_report['regionnm'] = region_name
+        monthly_report['resourceuuid'] = resource_uuid
         monthly_report.setdefault('timefm', 0)
 #        monthly_report['timefm'] = timeframe
         monthly_report.setdefault('itemnm', 0)
@@ -296,7 +298,6 @@ def query_monthly_report(context, timestamp_from=None,
         monthly_report['timefm'] = timeframe
         monthly_report_list.append(monthly_report)
     return {'data': monthly_report_list}
-
 
 def query_report(context, timestamp_from=None, timestamp_to=None,
                   period=None, item_name=None, resource_name=None, **kwargs):
