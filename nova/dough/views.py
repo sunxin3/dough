@@ -45,8 +45,8 @@ from horizon.forms import DateForm
 def tenant_dough_defaults(tenant_id):
     data = None
     client = DoughClient()
-    time_from = '2013-01-01T00:00:00'
-    time_to = '2013-12-31T00:00:00'
+    time_from = '2013-03-12T00:00:00'
+    time_to = '2014-12-31T00:00:00'
 #    time_to = time.strftime('%Y-%m-%dT%H:%M:%S',time.localtime(time.time()))
 
     data = client.query_monthly_report(tenant_id, time_from, time_to)
@@ -54,19 +54,22 @@ def tenant_dough_defaults(tenant_id):
 
 
 class Doughclient(object):
-    def __init__(self,dough_id=0,dough_item=0,dough_region=0,dough_charge=0):
+    def __init__(self,dough_id=0,dough_item=0,dough_resourcenm=0,dough_charge=0):
         self.id = dough_id
         self.item = dough_item
-        self.region = dough_region
-        self.charge = dough_charge
+        self.resourcenm = dough_resourcenm
+        self.charge = "%s%s" % (dough_charge, _("yuan"))
 
 class DoughClt(object):
-    def __init__(self,tenant_id):
+    def __init__(self,tenant_id,request):
         self.items = []
         b = tenant_dough_defaults(tenant_id)
         lenb = len(b['data'])
         for i in range(0, lenb):
-            d = Doughclient(i+1, b['data'][i]['itemnm'], b['data'][i]['regionnm'], b['data'][i]['linett'])
+#            d = Doughclient(i+1, b['data'][i]['itemnm'], b['data'][i]['resourceuuid'], b['data'][i]['linett'])
+            resourceuuid = b['data'][i]['resourceuuid']
+            instance = api.server_get(request, resourceuuid) 
+            d = Doughclient(i+1, b['data'][i]['itemnm'], instance.name, b['data'][i]['linett'])
             self.items.append(d)
 
 def tenant_products_defaults():
@@ -79,12 +82,12 @@ def tenant_products_defaults():
 class productsclient(object):
     def __init__(self,products_id=0, products_item=0,products_itemtype=0,products_order_size=0,products_order_unit=0,products_price=0,products_currency=0):
         self.id = products_id
-        self.item= products_item 
-        self.itemtype= products_itemtype 
+        self.item= _(products_item)
+        self.itemtype= _(products_itemtype) 
         self.order_size = products_order_size 
-        self.order_unit = products_order_unit 
-        self.price = products_price 
-        self.currency = products_currency
+        self.order_unit = _(products_order_unit) 
+        self.price = "%s%s" % (products_price, _("yuan")) 
+#        self.currency = products_currency
 
 class ProductsClt(object):
     def __init__(self):
@@ -106,7 +109,7 @@ class IndexView(tables.MultiTableView):
     def get_charge_data(self):
         try:
             tenant_id = self.request.user.tenant_id
-            dough_set = DoughClt(tenant_id)
+            dough_set = DoughClt(tenant_id,self.request)
             data = dough_set.items   
         except:
             exceptions.handle(self.request, _('Unable to get dough info.'))
