@@ -46,7 +46,7 @@ def tenant_dough_defaults(tenant_id):
     data = None
     client = DoughClient()
     time_from = '2013-03-12T00:00:00'
-    time_to = '2014-12-31T00:00:00'
+    time_to = '3014-12-31T00:00:00'
 #    time_to = time.strftime('%Y-%m-%dT%H:%M:%S',time.localtime(time.time()))
 
     data = client.query_monthly_report(tenant_id, time_from, time_to)
@@ -56,7 +56,7 @@ def tenant_dough_defaults(tenant_id):
 class Doughclient(object):
     def __init__(self,dough_id=0,dough_item=0,dough_resourcenm=0,dough_charge=0):
         self.id = dough_id
-        self.item = dough_item
+        self.item = _(dough_item)
         self.resourcenm = dough_resourcenm
         self.charge = "%s%s" % (dough_charge, _("yuan"))
 
@@ -66,10 +66,11 @@ class DoughClt(object):
         b = tenant_dough_defaults(tenant_id)
         lenb = len(b['data'])
         for i in range(0, lenb):
+            d = Doughclient(i+1, b['data'][i]['itemnm'], b['data'][i]['resourcenm'], b['data'][i]['linett'])
 #            d = Doughclient(i+1, b['data'][i]['itemnm'], b['data'][i]['resourceuuid'], b['data'][i]['linett'])
-            resourceuuid = b['data'][i]['resourceuuid']
-            instance = api.server_get(request, resourceuuid) 
-            d = Doughclient(i+1, b['data'][i]['itemnm'], instance.name, b['data'][i]['linett'])
+#            resourceuuid = b['data'][i]['resourceuuid']
+#            instance = api.server_get(request, resourceuuid) 
+#            d = Doughclient(i+1, b['data'][i]['itemnm'], instance.name, b['data'][i]['linett'])
             self.items.append(d)
 
 def tenant_products_defaults():
@@ -107,16 +108,20 @@ class IndexView(tables.MultiTableView):
     template_name = 'nova/dough/index.html'
 
     def get_charge_data(self):
+        data = []
+        #comment by sunxin and geyg for april demo disabling the error 
         try:
             tenant_id = self.request.user.tenant_id
             dough_set = DoughClt(tenant_id,self.request)
             data = dough_set.items   
+        #comment by sunxin and geyg for april demo disabling the error 
         except:
-            exceptions.handle(self.request, _('Unable to get dough info.'))
+            exceptions.handle(self.request, _('No Subscription Records.'))
         return data
 
     def get_products_data(self):
 #    def get_DataTableOptions_data(self):
+        data = []
         try:
             products_set = ProductsClt()
             data = products_set.items 
