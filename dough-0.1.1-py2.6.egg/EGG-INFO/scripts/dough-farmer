@@ -68,6 +68,7 @@ if __name__ == '__main__':
                                   price, currency, region_name, item_name,
                                   interval_unit, interval_size, is_prepaid])
 
+
         for (subscription_id, status, tenant_id, resource_uuid,
              created_at, updated_at, expires_at, order_unit,
              order_size, price, currency, region_name, item_name,
@@ -85,4 +86,5 @@ if __name__ == '__main__':
             except Exception, e:
                 print e, subscription_id, item_name
         print "<END>"
-        time.sleep(60 * 2)
+        #change the refresh time for charge geyg----sunxin
+        time.sleep(10)
